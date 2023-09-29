@@ -22,7 +22,7 @@ for city1, coord1 in sites.items():
     for city2, coord2 in sites.items():
         if city1 != city2:
             x2, y2 = coord2
-            distance = ((x1 - x2) ** 2 + (y1 - y2) ** 2) **0.5
+            distance = ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
             distances[city1][city2] = distance
 
 
