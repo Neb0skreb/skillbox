@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from termcolor import cprint
 from random import randint, choice
 
 ######################################################## Часть первая
@@ -86,13 +85,13 @@ class Human:
             self.fullness += need_food
             self.house.eat -= need_food
             self.total_eating += need_food
-            cprint('{} покушал, всего съедено {}'.format(self.name, self.total_eating), color=self.color)
+            print('{} покушал, всего съедено {}'.format(self.name, self.total_eating))
         else:
-            cprint('НЕТ ЕДЫ !', color='red')
+            print('НЕТ ЕДЫ !')
 
     def stroking_cat(self):
         self.fullness += 5
-        cprint('{} погладил(ла) кота'.format(self.name), color=self.color)
+        print('{} погладил(ла) кота'.format(self.name))
 
 
 class Husband(Human):
@@ -113,7 +112,7 @@ class Husband(Human):
             if self.fullness < 0 or self.happyness < 10:
                 self.is_live = False
                 self.house.citizen -= 1
-                cprint('{} не выжил'.format(self.name), color='red')
+                print('{} не выжил'.format(self.name))
             elif self.fullness <= 10 and self.house.eat > 0:
                 super().eat()
             elif self.house.money == 0:
@@ -132,12 +131,12 @@ class Husband(Human):
         self.fullness -= 10
         self.house.money += 150
         self.total_money += 150
-        cprint('{} сходил на работу'.format(self.name), color=self.color)
+        print('{} сходил на работу'.format(self.name))
 
     def gaming(self):
         self.fullness -= 10
         self.happyness += 20
-        cprint('{} поиграл'.format(self.name), color=self.color)
+        print('{} поиграл'.format(self.name))
 
 
 class Wife(Human):
@@ -157,7 +156,7 @@ class Wife(Human):
             if self.fullness < 0 or self.happyness < 10:
                 self.is_live = False
                 self.house.citizen -= 1
-                cprint('{} не выжила'.format(self.name), color='red')
+                print('{} не выжила'.format(self.name))
             elif self.fullness <= 10 and self.house.eat > 0:
                 super().eat()
             elif self.house.eat < 30 or (self.house.cats != 0 and self.house.cats_eat < 30):
@@ -180,23 +179,23 @@ class Wife(Human):
             self.house.eat += need_food
             self.house.cats_eat += need_cats_food
             self.house.money -= need_food + need_cats_food
-            cprint('{} купила еды'.format(self.name), color=self.color)
+            print('{} купила еды'.format(self.name))
         elif self.house.money <= need_food:
             self.house.eat += self.house.money
             self.house.money -= self.house.money
-            cprint('{} купила еды на последние деньги'.format(self.name), color=self.color)
+            print('{} купила еды на последние деньги'.format(self.name))
 
     def buy_fur_coat(self):
         self.fullness -= 10
         self.house.money -= 350
         self.happyness += 60
         self.fur_coat_count += 1
-        cprint('{} купила шубу'.format(self.name), color=self.color)
+        print('{} купила шубу'.format(self.name))
 
     def clean_house(self):
         self.fullness -= 10
         self.house.mud -= 100
-        cprint('{} прибралась'.format(self.name), color=self.color)
+        print('{} прибралась'.format(self.name))
 
 
 class Cat:
@@ -236,21 +235,21 @@ class Cat:
             self.house.cats_eat -= cats_eat_needed
             self.fullness += cats_eat_needed * 2
             self.total_eating += cats_eat_needed
-            cprint('котик {} покушал, всего съедено {}'.format(self.name, self.total_eating), color=self.color)
+            print('котик {} покушал, всего съедено {}'.format(self.name, self.total_eating))
         elif self.house.cats_eat < cats_eat_needed:
             self.house.cats_eat -= self.house.cats_eat
             self.fullness += self.house.cats_eat * 2
             self.total_eating += cats_eat_needed
-            cprint('котик {} съел остатки, всего съедено {}'.format(self.name, self.total_eating), color=self.color)
+            print('котик {} съел остатки, всего съедено {}'.format(self.name, self.total_eating))
 
     def sleep(self):
         self.fullness -= 10
-        cprint('котик {} поспал'.format(self.name), color=self.color)
+        print('котик {} поспал'.format(self.name))
 
     def soil(self):
         self.fullness -= 10
         self.house.mud += 5
-        cprint('котик {} драл обои'.format(self.name), color=self.color)
+        print('котик {} драл обои'.format(self.name))
 
 
 class Child(Human):
@@ -268,7 +267,7 @@ class Child(Human):
             if self.fullness < 0 or self.happyness < 0:
                 self.is_live = False
                 self.house.citizen -= 1
-                cprint('{} не выжил(а)'.format(self.name), color='red')
+                print('{} не выжил(а)'.format(self.name))
             elif self.fullness <= 20 and self.house.eat > 0:
                 self.eat()
             else:
@@ -279,7 +278,7 @@ class Child(Human):
 
     def sleep(self):
         self.fullness -= 10
-        cprint('{} поспал'.format(self.name), color=self.color)
+        print('{} поспал'.format(self.name))
 
 
 class Family:
@@ -325,9 +324,9 @@ class FamilySimulator:
     def run_game(self, days=365):
         for day in range(days):
             self.year_day += 1
-            cprint(f'================== день {self.year_day} год {self.year} ==================', color='red')
+            print(f'================== день {self.year_day} год {self.year} ==================')
             if self.home.citizen == 0:
-                cprint('НИКТО НЕ ВЫЖИЛ ИЗ ЛЮДЕЙ', color='red')
+                print('НИКТО НЕ ВЫЖИЛ ИЗ ЛЮДЕЙ')
                 break
             else:
                 self.run_day()
@@ -352,7 +351,7 @@ class FamilySimulator:
         print(self.home)
 
     def year_report(self):
-        cprint('\n====================================', color='red')
+        print('\n====================================')
         i = 4
         print('Итого за год:')
         print('  1) заработано:', self.family.husband.total_money, ';')
@@ -365,7 +364,7 @@ class FamilySimulator:
         for cat in self.family.cats:
             i += 1
             print('  {}) котик {} съел:'.format(i, cat.name), cat.total_eating, ';')
-        cprint('====================================', color='red')
+        print('====================================')
 
 
 def get_digit_input(text):
@@ -374,7 +373,7 @@ def get_digit_input(text):
         if user_input.isdigit():
             break
         else:
-            cprint('Ошибка: Введите число !', color='red')
+            print('Ошибка: Введите число !')
     return int(user_input)
 
 
@@ -384,7 +383,7 @@ if __name__ == '__main__':
 
     while True:
         if is_first_start:
-            cprint('\n *** Симулятор жизни семьи ***', color='magenta')
+            print('\n *** Симулятор жизни семьи ***')
             is_begin = True if input('Играем ? (y/n):') in ('Д', 'д', 'Y', 'y', '') else False
             is_first_start = False
         else:
@@ -393,7 +392,7 @@ if __name__ == '__main__':
                 if child_count:
                     cats_count = get_digit_input('Укажите кол-во кошек:')
                     if cats_count:
-                        cprint('\nСемья создана', color='magenta')
+                        print('\nСемья создана')
                         game = FamilySimulator(child_count=child_count, cats_count=cats_count)
                         print(game)
                         days_count = get_digit_input('Укажите кол-во дней:')
