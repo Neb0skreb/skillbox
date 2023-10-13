@@ -1,0 +1,404 @@
+# -*- coding: utf-8 -*-
+
+from random import randint, choice
+
+######################################################## Часть первая
+#
+# Создать модель жизни небольшой семьи.
+#
+# Каждый день участники жизни могут делать только одно действие.
+# Все вместе они должны прожить год и не умереть.
+#
+# Муж может:
+#   есть,
+#   играть в WoT,
+#   ходить на работу,
+# Жена может:
+#   есть,
+#   покупать продукты,
+#   покупать шубу,
+#   убираться в доме,
+
+# Все они живут в одном доме, дом характеризуется:
+#   кол-во денег в тумбочке (в начале - 100)
+#   кол-во еды в холодильнике (в начале - 50)
+#   кол-во грязи (в начале - 0)
+#
+# У людей есть имя, степень сытости (в начале - 30) и степень счастья (в начале - 100).
+#
+# Любое действие, кроме "есть", приводит к уменьшению степени сытости на 10 пунктов
+# Кушают взрослые максимум по 30 единиц еды, степень сытости растет на 1 пункт за 1 пункт еды.
+# Степень сытости не должна падать ниже 0, иначе чел умрет от голода.
+#
+# Деньги в тумбочку добавляет муж, после работы - 150 единиц за раз.
+# Еда стоит 10 денег 10 единиц еды. Шуба стоит 350 единиц.
+#
+# Грязь добавляется каждый день по 5 пунктов, за одну уборку жена может убирать до 100 единиц грязи.
+# Если в доме грязи больше 90 - у людей падает степень счастья каждый день на 10 пунктов,
+# Степень счастья растет: у мужа от игры в WoT (на 20), у жены от покупки шубы (на 60, но шуба дорогая)
+# Степень счастья не должна падать ниже 10, иначе чел умрает от депресии.
+#
+# Подвести итоги жизни за год: сколько было заработано денег, сколько сьедено еды, сколько куплено шуб.
+
+
+class House:
+
+    def __init__(self):
+        self.money = 100
+        self.eat = 50
+        self.cats_eat = 30
+        self.mud = 0
+        self.citizen = 0
+        self.cats = 0
+
+    def __str__(self):
+        return 'В доме: жителей {}, еды {}, денег {}, грязи {}, котиков {}, кошачьей еды {}'.format(self.citizen,
+                                                                                                    self.eat,
+                                                                                                    self.money,
+                                                                                                    self.mud,
+                                                                                                    self.cats,
+                                                                                                    self.cats_eat)
+
+
+class Human:
+
+    def __init__(self, name, house, color):
+        self.name = name
+        self.is_live = True
+        self.total_eating = 0
+        self.house = house
+        self.house.citizen += 1
+        self.fullness = 30
+        self.happyness = 100
+        self.color = color
+
+    def __str__(self):
+        if self.is_live:
+            return '{}, сытость {}, счастье {}'.format(self.name, self.fullness, self.happyness)
+        else:
+            return '{} умер(ла)'.format(self.name)
+
+    def eat(self):
+        if self.house.eat > 0:
+            need_food = 30 - self.fullness
+            need_food = need_food if self.house.eat > need_food else self.house.eat
+            self.fullness += need_food
+            self.house.eat -= need_food
+            self.total_eating += need_food
+            print('{} покушал, всего съедено {}'.format(self.name, self.total_eating))
+        else:
+            print('НЕТ ЕДЫ !')
+
+    def stroking_cat(self):
+        self.fullness += 5
+        print('{} погладил(ла) кота'.format(self.name))
+
+
+class Husband(Human):
+    male_name = ['Игорь', 'Иван', 'Николай', 'Петр', 'Андрей', 'Павел', ]
+
+    def __init__(self, name=None, house=None, color='blue'):
+        self.name = name if name else choice(Husband.male_name)
+        self.total_money = 0
+        super().__init__(name=self.name, house=house, color=color)
+
+    def __str__(self):
+        return 'муж ' + super().__str__() + ', всего заработано {}'.format(self.total_money)
+
+    def act(self):
+
+        if self.is_live:
+            dice = randint(1, 3)
+            if self.fullness < 0 or self.happyness < 10:
+                self.is_live = False
+                self.house.citizen -= 1
+                print('{} не выжил'.format(self.name))
+            elif self.fullness <= 10 and self.house.eat > 0:
+                super().eat()
+            elif self.house.money == 0:
+                self.work()
+            elif dice == 1:
+                self.work()
+            elif dice == 2:
+                self.gaming()
+            elif dice == 3:
+                super().stroking_cat()
+
+            if self.house.mud >= 90:
+                self.happyness -= 10
+
+    def work(self):
+        self.fullness -= 10
+        self.house.money += 150
+        self.total_money += 150
+        print('{} сходил на работу'.format(self.name))
+
+    def gaming(self):
+        self.fullness -= 10
+        self.happyness += 20
+        print('{} поиграл'.format(self.name))
+
+
+class Wife(Human):
+    female_name = ['Оля', 'Катя', 'Таня', 'Вера', 'Света', 'Юля', ]
+
+    def __init__(self, name=None, house=None, color='cyan'):
+        self.name = name if name else choice(Wife.female_name)
+        super().__init__(name=self.name, house=house, color=color)
+        self.fur_coat_count = 0
+
+    def __str__(self):
+        return 'жена ' + super().__str__() + ', кол-во шуб {}'.format(self.fur_coat_count)
+
+    def act(self):
+
+        if self.is_live:
+            if self.fullness < 0 or self.happyness < 10:
+                self.is_live = False
+                self.house.citizen -= 1
+                print('{} не выжила'.format(self.name))
+            elif self.fullness <= 10 and self.house.eat > 0:
+                super().eat()
+            elif self.house.eat < 30 or (self.house.cats != 0 and self.house.cats_eat < 30):
+                self.shopping()
+            elif self.house.mud >= 90:
+                self.clean_house()
+            elif self.house.money >= 350 + 30 * self.house.citizen:
+                self.buy_fur_coat()
+            else:
+                self.shopping()
+
+            if self.house.mud >= 90:
+                self.happyness -= 10
+
+    def shopping(self):
+        self.fullness -= 10
+        need_food = 30 * self.house.citizen - self.house.eat
+        need_cats_food = 30 * self.house.cats - self.house.cats_eat
+        if self.house.money >= need_food + need_cats_food:
+            self.house.eat += need_food
+            self.house.cats_eat += need_cats_food
+            self.house.money -= need_food + need_cats_food
+            print('{} купила еды'.format(self.name))
+        elif self.house.money <= need_food:
+            self.house.eat += self.house.money
+            self.house.money -= self.house.money
+            print('{} купила еды на последние деньги'.format(self.name))
+
+    def buy_fur_coat(self):
+        self.fullness -= 10
+        self.house.money -= 350
+        self.happyness += 60
+        self.fur_coat_count += 1
+        print('{} купила шубу'.format(self.name))
+
+    def clean_house(self):
+        self.fullness -= 10
+        self.house.mud -= 100
+        print('{} прибралась'.format(self.name))
+
+
+class Cat:
+    cats_name = ['Барсик', 'Бродяга', 'Пушок', 'Гав', 'Черныш', 'Пират', ]
+
+    def __init__(self, name=None, house=None, color=None):
+        self.name = name if name else choice(Cat.cats_name)
+        self.fullness = 30
+        self.is_live = True
+        self.total_eating = 0
+        self.house = house
+        self.house.cats += 1
+        self.color = color
+
+    def __str__(self):
+        if self.is_live:
+            return 'котик {}, сытость {}'.format(self.name, self.fullness)
+        else:
+            return 'котик {} умер'.format(self.name)
+
+    def act(self):
+        if self.is_live:
+            dice = randint(1, 2)
+            if self.fullness < 0:
+                self.is_live = False
+                self.house.cats -= 1
+            elif self.fullness < 30 and self.house.cats_eat > 0:
+                self.eat()
+            elif dice == 1:
+                self.sleep()
+            elif dice == 2:
+                self.soil()
+
+    def eat(self):
+        cats_eat_needed = 30 - self.fullness
+        if self.house.cats_eat >= cats_eat_needed:
+            self.house.cats_eat -= cats_eat_needed
+            self.fullness += cats_eat_needed * 2
+            self.total_eating += cats_eat_needed
+            print('котик {} покушал, всего съедено {}'.format(self.name, self.total_eating))
+        elif self.house.cats_eat < cats_eat_needed:
+            self.house.cats_eat -= self.house.cats_eat
+            self.fullness += self.house.cats_eat * 2
+            self.total_eating += cats_eat_needed
+            print('котик {} съел остатки, всего съедено {}'.format(self.name, self.total_eating))
+
+    def sleep(self):
+        self.fullness -= 10
+        print('котик {} поспал'.format(self.name))
+
+    def soil(self):
+        self.fullness -= 10
+        self.house.mud += 5
+        print('котик {} драл обои'.format(self.name))
+
+
+class Child(Human):
+    names = Husband.male_name + Wife.female_name
+
+    def __init__(self, name=None, house=None, color='green'):
+        self.name = name if name else choice(Child.names)
+        super().__init__(name=self.name, house=house, color=color)
+
+    def __str__(self):
+        return 'ребенок ' + super().__str__()
+
+    def act(self):
+        if self.is_live:
+            if self.fullness < 0 or self.happyness < 0:
+                self.is_live = False
+                self.house.citizen -= 1
+                print('{} не выжил(а)'.format(self.name))
+            elif self.fullness <= 20 and self.house.eat > 0:
+                self.eat()
+            else:
+                self.sleep()
+
+    def eat(self):
+        super().eat()
+
+    def sleep(self):
+        self.fullness -= 10
+        print('{} поспал'.format(self.name))
+
+
+class Family:
+
+    def __init__(self, house=None, child_count=None, cats_count=None):
+        self.husband = Husband(house=house)
+        self.wife = Wife(house=house)
+        self.children = []
+        for child in range(child_count):
+            self.children.append(Child(house=house, color='green'))
+        self.cats = []
+        for cat in range(cats_count):
+            self.cats.append(Cat(house=house, color='yellow'))
+
+    def __str__(self):
+        child_desc = '\n '.join(map(str, self.children))
+        cats_desc = '\n '.join(map(str, self.cats))
+        return f'Семья состоит из: \n {self.husband} \n {self.wife} \n {child_desc} \n {cats_desc}'
+
+    def act(self):
+        self.husband.act()
+        self.wife.act()
+        for child in self.children:
+            child.act()
+        for cat in self.cats:
+            cat.act()
+
+
+class FamilySimulator:
+    """
+        Симулятор жизни 1 семьи, кол-во детей, котов и дней не ограничено
+    """
+
+    def __init__(self, child_count=0, cats_count=0):
+        self.home = House()
+        self.family = Family(house=self.home, child_count=child_count, cats_count=cats_count)
+        self.year_day = 0
+        self.year = 2019
+
+    def __str__(self):
+        return str(self.family) + '\n' + str(self.home)
+
+    def run_game(self, days=365):
+        for day in range(days):
+            self.year_day += 1
+            print(f'================== день {self.year_day} год {self.year} ==================')
+            if self.home.citizen == 0:
+                print('НИКТО НЕ ВЫЖИЛ ИЗ ЛЮДЕЙ')
+                break
+            else:
+                self.run_day()
+                self.day_report()
+                if self.year_day == 365:
+                    self.year_report()
+                    self.year_day = 0
+                    self.year += 1
+
+    def run_day(self):
+        self.home.mud += 5
+        self.family.act()
+
+    def day_report(self):
+        print('\nИтоги дня:')
+        print(self.family.husband)
+        print(self.family.wife)
+        for child in self.family.children:
+            print(child)
+        for cat in self.family.cats:
+            print(cat)
+        print(self.home)
+
+    def year_report(self):
+        print('\n====================================')
+        i = 4
+        print('Итого за год:')
+        print('  1) заработано:', self.family.husband.total_money, ';')
+        print('  2) куплено шуб:', self.family.wife.fur_coat_count, ';')
+        print('  3) муж {} съел:'.format(self.family.husband.name), self.family.husband.total_eating, ';')
+        print('  4) жена {} съела:'.format(self.family.wife.name), self.family.wife.total_eating, ';')
+        for child in self.family.children:
+            i += 1
+            print('  {}) ребенок {} съел:'.format(i, child.name), child.total_eating, ';')
+        for cat in self.family.cats:
+            i += 1
+            print('  {}) котик {} съел:'.format(i, cat.name), cat.total_eating, ';')
+        print('====================================')
+
+
+def get_digit_input(text):
+    while True:
+        user_input = input(text)
+        if user_input.isdigit():
+            break
+        else:
+            print('Ошибка: Введите число !')
+    return int(user_input)
+
+
+if __name__ == '__main__':
+    is_first_start = True
+    is_begin = False
+
+    while True:
+        if is_first_start:
+            print('\n *** Симулятор жизни семьи ***')
+            is_begin = True if input('Играем ? (y/n):') in ('Д', 'д', 'Y', 'y', '') else False
+            is_first_start = False
+        else:
+            if is_begin:
+                child_count = get_digit_input('Укажите кол-во детей:')
+                if child_count:
+                    cats_count = get_digit_input('Укажите кол-во кошек:')
+                    if cats_count:
+                        print('\nСемья создана')
+                        game = FamilySimulator(child_count=child_count, cats_count=cats_count)
+                        print(game)
+                        days_count = get_digit_input('Укажите кол-во дней:')
+                        if days_count:
+                            game.run_game(days=days_count)
+                            is_first_start = True
+            else:
+                break
+
